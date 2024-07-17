@@ -7,13 +7,12 @@ canvas.width = 600;
 canvas.height = 600;
 app.appendChild(canvas);
 const ctx = canvas.getContext("2d");
-let animationId;
-let isRunning = false;
 
 const rows = Math.floor(canvas.width / cellWidth);
 const cols = Math.floor(canvas.height / cellHeight);
 let grid;
-console.log(rows, cols)
+let animationId;
+let isRunning = false;
 
 const create2DArray = () => {
     let arr = new Array(rows);
@@ -27,15 +26,6 @@ const createGrid = () => {
     const grid = create2DArray(rows, cols);
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
-            // if( (i === 12 && j === 14) ||
-            // (i === 13 && j === 15) ||
-            // (i === 14 && j === 14) ||
-            // (i === 14 && j === 15) ||
-            // (i === 14 && j === 13)){
-            //     grid[i][j] = 1
-            // }else{
-            //     grid[i][j] = 0
-            // }
             grid[i][j] = generateRandomNumber(2);
         }
     }
@@ -49,32 +39,34 @@ const generateRandomNumber = (max) => {
 
 const drawGrid = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
             if (grid[i][j] === 1) {
                 ctx.fillStyle = "yellow";
+
                 ctx.strokeRect(
-                    i * cellWidth,
-                    j * cellHeight,
+                    j * cellWidth,
+                    i * cellHeight,
                     cellWidth,
                     cellHeight
                 );
                 ctx.fillRect(
-                    i * cellWidth,
-                    j * cellHeight,
+                    j * cellWidth,
+                    i * cellHeight,
                     cellWidth - 1,
                     cellHeight - 1
                 );
             } else {
                 ctx.clearRect(
-                    i * cellWidth,
-                    j * cellHeight,
+                    j * cellWidth,
+                    i * cellHeight,
                     cellWidth - 1,
                     cellHeight - 1
                 );
                 ctx.strokeRect(
-                    i * cellWidth,
-                    j * cellHeight,
+                    j * cellWidth,
+                    i * cellHeight,
                     cellWidth,
                     cellHeight
                 );
@@ -88,7 +80,6 @@ const nextGrid = () => {
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
             let liveNeighbours = countLiveNeighbours(i, j);
-            // console.log(liveNeighbours, i, j);
             if (grid[i][j] === 0 && liveNeighbours === 3) {
                 newGrid[i][j] = 1;
             } else if (
@@ -120,7 +111,6 @@ const countLiveNeighbours = (x, y) => {
 
 const main = () => {
     grid = createGrid();
-    // console.table(grid)
     drawGrid();
 };
 
@@ -137,7 +127,6 @@ document.getElementById("start").addEventListener("click", () => {
         isRunning = true;
         drawNextGrid();
     }
-    // setInterval(drawNextGrid,1000)
 });
 
 document.getElementById("next").addEventListener("click", () => {
@@ -148,7 +137,6 @@ document.getElementById("next").addEventListener("click", () => {
 document.getElementById("stop").addEventListener("click", () => {
     isRunning = false;
     cancelAnimationFrame(animationId);
-    // console.log("abc");
 });
 
 document.getElementById("reset").addEventListener("click", () => {
@@ -156,18 +144,18 @@ document.getElementById("reset").addEventListener("click", () => {
     cancelAnimationFrame(animationId);
     grid = createGrid();
     drawGrid();
-    // console.log("abc");
 });
 
 canvas.addEventListener("click", function (event) {
-    // Step 3: Handle the click event
-    // You can get the mouse coordinates relative to the canvas like this:
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    // Example action: Log the coordinates
-    console.log(`Clicked at (${x}, ${y})`);
+    let row = Math.floor(y / cellHeight);
+    let col = Math.floor(x / cellWidth);
+
+    grid[row][col] = grid[row][col] ? 0 : 1;
+    drawGrid();
 });
 
 main();
@@ -175,3 +163,5 @@ main();
 // on click on grid cell activate or deactivate
 
 // handle wrap around logic
+
+// check with some knows patterns to verify if it is working correctly or not
