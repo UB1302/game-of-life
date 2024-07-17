@@ -71,7 +71,7 @@ const setup = () => {
     next();
 
     // abc()
-    setInterval(next,100)
+    // setInterval(next,100)
 };
 
 const next = () => {

@@ -1,0 +1,13 @@
+body {
+    font-family: sans-serif;
+    background-color: #3663a8;
+}
+
+#title {
+    text-align: center;
+    color: #aacbff;
+}
+
+#app {
+    display: flex;
+}
