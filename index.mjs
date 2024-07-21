@@ -1,180 +1,164 @@
-// Note - replacing old grid with new grid, not handling the edges
-const rows = 30;
-const cols = 30;
-
-const generateRandomInt = (max) => {
-    return Math.floor(Math.random() * max);
-};
+const cellHeight = 20;
+const cellWidth = 20;
 
 const app = document.getElementById("app");
-let gridContainer = document.createElement("div");
-gridContainer.classList.add("container");
-let currentGridId = generateRandomInt(50); // why this error  - Cannot access 'generateRandomInt' before initialization
-let newGridId;
-gridContainer.id = currentGridId;
-app.appendChild(gridContainer);
-let nextBtn = document.getElementById("next");
-nextBtn.addEventListener("click", () => {
-    next();
-});
+const canvas = document.createElement("canvas");
+canvas.width = 600;
+canvas.height = 600;
+app.appendChild(canvas);
+const ctx = canvas.getContext("2d");
 
-const make2DArray = (rows, cols) => {
+const rows = Math.floor(canvas.width / cellWidth);
+const cols = Math.floor(canvas.height / cellHeight);
+let grid;
+let animationId;
+let isRunning = false;
+
+const create2DArray = () => {
     let arr = new Array(rows);
-
     for (let i = 0; i < rows; i++) {
         arr[i] = new Array(cols);
     }
-    // console.log(arr)
     return arr;
 };
 
-// make2DArray(10,10)
-
-const generateGrid = () => {
-    let grid = make2DArray(rows, cols);
+const createGrid = () => {
+    const grid = create2DArray(rows, cols);
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
-            let gridCell = document.createElement("div");
-            gridCell.id = `${i},${j}`;
-            gridCell.dataset.index = [i, j];
-            gridCell.addEventListener("click", () => {
-                gridCell.classList.toggle("grid-item-active");
-            });
-            gridCell.classList.add("grid-item");
-            gridContainer.appendChild(gridCell);
+            grid[i][j] = generateRandomNumber(2);
         }
     }
-    setup();
-    return;
+
+    return grid;
 };
 
-const setup = () => {
+const generateRandomNumber = (max) => {
+    return Math.floor(Math.random() * max);
+};
+
+const drawGrid = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
-            let gridCell = document.getElementById(`${i},${j}`);
-            
-            if (generateRandomInt(2)) {
-                gridCell.classList.add("grid-item-active");
+            if (grid[i][j] === 1) {
+                ctx.fillStyle = "yellow";
+
+                ctx.strokeRect(
+                    j * cellWidth,
+                    i * cellHeight,
+                    cellWidth,
+                    cellHeight
+                );
+                ctx.fillRect(
+                    j * cellWidth,
+                    i * cellHeight,
+                    cellWidth - 1,
+                    cellHeight - 1
+                );
+            } else {
+                ctx.clearRect(
+                    j * cellWidth,
+                    i * cellHeight,
+                    cellWidth - 1,
+                    cellHeight - 1
+                );
+                ctx.strokeRect(
+                    j * cellWidth,
+                    i * cellHeight,
+                    cellWidth,
+                    cellHeight
+                );
             }
-            // if (
-            //     (i === 12 && j === 14) ||
-            //     (i === 13 && j === 15) ||
-            //     (i === 14 && j === 14) ||
-            //     (i === 14 && j === 15) ||
-            //     (i === 14 && j === 13)
-            // ) {
-            //     gridCell.classList.add("grid-item-active");
-            // }
         }
     }
-
-    next();
-
-    // abc()
-    // setInterval(next,100)
 };
 
-const next = () => {
-    console.time();
-    let newContainer = document.createElement("div");
-    newContainer.classList.add("container");
-    newGridId = generateRandomInt(50);
-    newContainer.id = newGridId;
-
+const nextGrid = () => {
+    let newGrid = create2DArray(rows, cols);
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
-            // let gridCell = document.getElementById(`${i},${j}`)
-            // if (i === 0 || i === cols - 1 || j === 0 || j === cols - 1) {
-            //     let oldGridCell = document.getElementById(`${i},${j}`);
-
-            //     let gridCell = document.createElement("div");
-            //     gridCell.id = `${i},${j}`;
-            //     gridCell.addEventListener("click", () => {
-            //         gridCell.classList.toggle("grid-item-active");
-            //     });
-            //     gridCell.classList.add("grid-item");
-            //     if (oldGridCell.classList.contains("grid-item-active")) {
-            //         gridCell.classList.add("grid-item-active");
-            //     }
-            //     newContainer.appendChild(gridCell);
-            // } else {
-                let { numberOfDeadNeighbours, numberOfAliveNeighbours } =
-                    calculateNeighbours(i, j);
-                let oldGridCell = document.getElementById(`${i},${j}`);
-                let isOldGridCellLive = false;
-                if (oldGridCell.classList.contains("grid-item-active")) {
-                    isOldGridCellLive = true;
-                }
-
-                let gridCell = document.createElement("div");
-                gridCell.id = `${i},${j}`;
-                gridCell.addEventListener("click", () => {
-                    gridCell.classList.toggle("grid-item-active");
-                });
-                gridCell.classList.add("grid-item");
-
-                if (numberOfAliveNeighbours === 3 && !isOldGridCellLive) {
-                    gridCell.classList.add("grid-item-active");
-                    newContainer.appendChild(gridCell);
-                } else if (
-                    (numberOfAliveNeighbours < 2 ||
-                        numberOfAliveNeighbours >= 4) &&
-                    isOldGridCellLive
-                ) {
-                    
-                    gridCell.classList.remove("grid-item-active");
-                    newContainer.appendChild(gridCell);
-                } else {
-                    // gridCell.classList.add("grid-item-active");
-                    let oldGridCell = document.getElementById(`${i},${j}`);
-                    let gridCell = document.createElement("div");
-                    gridCell.id = `${i},${j}`;
-                    gridCell.addEventListener("click", () => {
-                        gridCell.classList.toggle("grid-item-active");
-                    });
-                    gridCell.classList.add("grid-item");
-                    if (oldGridCell.classList.contains("grid-item-active")) {
-                        gridCell.classList.add("grid-item-active");
-                    }
-                    newContainer.appendChild(gridCell);
-                }
-            // }
+            let liveNeighbours = countLiveNeighbours(i, j);
+            if (grid[i][j] === 0 && liveNeighbours === 3) {
+                newGrid[i][j] = 1;
+            } else if (
+                grid[i][j] === 1 &&
+                (liveNeighbours < 2 || liveNeighbours >= 4)
+            ) {
+                newGrid[i][j] = 0;
+            } else {
+                newGrid[i][j] = grid[i][j];
+            }
         }
     }
-
-    let currentGrid = document.getElementById(currentGridId);
-
-    currentGridId = newGridId;
-
-    currentGrid.parentNode.replaceChild(newContainer, currentGrid);
-    console.timeEnd();
-    return;
+    grid = newGrid;
 };
 
-const calculateNeighbours = (x, y) => {
-    let numberOfDeadNeighbours = 0;
-    let numberOfAliveNeighbours = 0;
+const countLiveNeighbours = (x, y) => {
+    let liveNeighbours = 0;
     for (let i = -1; i < 2; i++) {
         for (let j = -1; j < 2; j++) {
-            // let a = x + i;
-            // let b = y + j;
-            let a = (x + i + rows) % rows;
-            let b = (y + j + cols) % cols;
+            let row = (x + i + rows) % rows;
+            let col = (y + j + cols) % cols;
 
-            if (a === x && b === y) {
-            } else {
-                let gridCell = document.getElementById(`${a},${b}`);
-
-                if (gridCell.classList.contains("grid-item-active")) {
-                    numberOfAliveNeighbours += 1;
-                } else {
-                    numberOfDeadNeighbours += 1;
-                }
-            }
+            liveNeighbours += grid[row][col];
         }
     }
-
-    return { numberOfDeadNeighbours, numberOfAliveNeighbours };
+    liveNeighbours -= grid[x][y];
+    return liveNeighbours;
 };
 
-generateGrid();
+const main = () => {
+    grid = createGrid();
+    drawGrid();
+};
+
+const drawNextGrid = () => {
+    nextGrid();
+    drawGrid();
+    if (isRunning) {
+        animationId = requestAnimationFrame(drawNextGrid);
+    }
+};
+
+document.getElementById("start").addEventListener("click", () => {
+    if (!isRunning) {
+        isRunning = true;
+        drawNextGrid();
+    }
+});
+
+document.getElementById("next").addEventListener("click", () => {
+    nextGrid();
+    drawGrid();
+});
+
+document.getElementById("stop").addEventListener("click", () => {
+    isRunning = false;
+    cancelAnimationFrame(animationId);
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+    isRunning = false;
+    cancelAnimationFrame(animationId);
+    grid = createGrid();
+    drawGrid();
+});
+
+canvas.addEventListener("click", function (event) {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    let row = Math.floor(y / cellHeight);
+    let col = Math.floor(x / cellWidth);
+
+    grid[row][col] = grid[row][col] ? 0 : 1;
+    drawGrid();
+});
+
+main();
+
+
+// check with some knows patterns to verify if it is working correctly or not
